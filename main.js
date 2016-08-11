@@ -8,15 +8,7 @@ var fortune = require('./lib/fortune');
 //Set view engine with handlebars
 var handlebars = require('express3-handlebars')
     .create({
-        defaultLayout: 'main',
-        extname: '.hbs',
-        helpers: {
-            section: function(name, options) {
-                if (!this._sections) this._sections = {};
-                this._sections[name] = options.fn(this);
-                return null;
-            }
-        }
+        defaultLayout: 'main'
     });
 app.engine('handlebars', handlebars.engine);
 app.set('view engine', 'handlebars');
@@ -27,11 +19,11 @@ app.disable('x-powered-by');
 
 app.use(express.static(__dirname + '/public'));
 
-// app.use(function(req, res, next) {
-//     if (!res.locals.partials) res.locals.partials = {};
-//     res.locals.partials.weather = getWeatherData();
-//     next();
-// });
+app.use(function(req, res, next) {
+    if (!res.locals.partials) res.locals.partials = {};
+    res.locals.partials.weather = getWeatherData();
+    next();
+});
 
 app.use(function(req, res, next) {
     res.locals.showTests = app.get('env') !== 'production' &&
