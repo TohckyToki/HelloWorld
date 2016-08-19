@@ -1,4 +1,6 @@
 var express = require('express');
+var formidable = require('formidable');
+var jqupload = require('jquery-file-upload-middleware');
 
 var app = express();
 
@@ -8,7 +10,14 @@ var fortune = require('./lib/fortune');
 //Set view engine with handlebars
 var handlebars = require('express3-handlebars')
     .create({
-        defaultLayout: 'main'
+        defaultLayout: 'main',
+        helpers: {
+            section: function(name, options) {
+                if (!this._sections) this._sections = {};
+                this._sections[name] = options.fn(this);
+                return null;
+            }
+        }
     });
 app.engine('handlebars', handlebars.engine);
 app.set('view engine', 'handlebars');
@@ -18,6 +27,8 @@ app.set('port', process.env.PROT || 3000);
 app.disable('x-powered-by');
 
 app.use(express.static(__dirname + '/public'));
+
+app.use(require('body-parser')());
 
 app.use(function(req, res, next) {
     if (!res.locals.partials) res.locals.partials = {};
@@ -35,6 +46,39 @@ app.get('/', function(req, res) {
     res.render('home');
 });
 
+app.get('/contest/vacation-photo', function(req, res) {
+    var now = new Date();
+    res.render('contest/vacation-photo', {
+        year: now.getFullYear(),
+        month: now.getMonth()
+    });
+});
+
+app.get('/mapuse', function(req, res) {
+    res.render('mapuse');
+})
+
+app.get('/newsletter', function(req, res) {
+    // we'll learn CSRF later,now just provide a virtual value
+    res.render('newsletter', { csrf: 'CSRF token goes here' });
+});
+
+app.get('/jquerytest', function(req, res) {
+    res.render('jquerytest');
+})
+
+app.get('/nursery-rhyme', function(req, res) {
+    res.render('nursery-rhyme');
+});
+
+app.get('/data/nursery-rhyme', function(req, res) {
+    res.json({
+        animal: 'squirrel',
+        bodyPart: 'tail',
+        adjective: 'bushy',
+        noun: 'heck',
+    });
+});
 
 app.get('/headers', function(req, res) {
     res.set('Content-Type', 'text/plain');
@@ -61,6 +105,34 @@ app.get('/tours/oregon-coast', function(req, res) {
 app.get('/tours/request-group-rate', function(req, res) {
     res.render('tours/request-group-rate', {
         referrer: req.headers.referer
+    });
+});
+
+app.post('/process', function(req, res) {
+    if (req.xhr || req.accepts('json,html') === 'json') {
+        // if error happened，send { error: 'error description' }
+        res.send({ success: true });
+    } else {
+        // if error happened，redirect to error page.
+        console.log('Form (from querystring): ' + req.query.form);
+        console.log('CSRF token (from hidden form field): ' + req.body._csrf);
+        console.log('Name (from visible form field): ' + req.body.name);
+        console.log('Email (from visible form field): ' + req.body.email);
+        res.redirect(303, '/thank-you');
+    }
+});
+
+app.post('/contest/vacation-photo/:year/:month', function(req, res) {
+    var form = new formidable.IncomingForm()
+    form.uploadDir = "upload/";
+    form.keepExtensions = true;
+    form.parse(req, function(err, fields, files) {
+        if (err) return res.redirect(303, '/error');
+        console.log('received fields:');
+        console.log(fields);
+        console.log('received files:');
+        console.log(files);
+        res.redirect(303, '/thank-you');
     });
 });
 

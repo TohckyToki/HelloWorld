@@ -4,9 +4,12 @@
   "description": "this is a demo for express",
   "main": "main.js",
   "dependencies": {
+    "body-parser": "^1.15.2",
     "express": "^4.14.0",
     "express3-handlebars": "^0.5.2",
-    "jquery": "^3.1.0"
+    "formidable": "^1.0.17",
+    "jquery": "^3.1.0",
+    "jquery-file-upload-middleware": "^0.1.7"
   },
   "devDependencies": {
     "chai": "^3.5.0",
