@@ -1,5 +1,13 @@
+<<<<<<< HEAD
 node_modules
 bower_components
 *~
 .DS_Store
 upload
+=======
+node_modules
+bower_components
+*~
+.DS_Store
+upload
+>>>>>>> remote
